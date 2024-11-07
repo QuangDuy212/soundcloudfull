@@ -1,0 +1,19 @@
+server:
+  port: 8000
+spring:
+  application:
+    name: identity-service
+  datasource:
+    url: "jdbc:mysql://localhost:3306/soundcloud_identity"
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+quangduy:
+  jwt:
+    base64-secret: qoAEABDke07+AVLepXB4aCMtsT0wMAqR5x2VFyldsnx6e75YQkJH2UcZKTjEyoNgG71SBCXfq5N6NVZxWOfsHQ==
+    access-token-validity-in-seconds: 8640000
+    refresh-token-validity-in-seconds: 8640000
