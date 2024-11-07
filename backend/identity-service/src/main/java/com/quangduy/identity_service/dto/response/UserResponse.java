@@ -1,6 +1,5 @@
 package com.quangduy.identity_service.dto.response;
 
-import com.quangduy.identity_service.constant.PredefinedRole;
 import com.quangduy.identity_service.constant.TypeEnum;
 
 import lombok.AccessLevel;

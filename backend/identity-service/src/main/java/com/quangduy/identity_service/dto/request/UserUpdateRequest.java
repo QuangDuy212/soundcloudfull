@@ -15,7 +15,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserCreataionRequest {
+public class UserUpdateRequest {
+    String _id;
     @Size(min = 4, message = "USERNAME_INVALID")
     String username;
 
