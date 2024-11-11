@@ -17,6 +17,12 @@ import org.springframework.stereotype.Service;
 import com.nimbusds.jose.util.Base64;
 import com.quangduy.identity_service.dto.response.LoginResponse;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -26,28 +32,32 @@ import java.util.Optional;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+@Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class SecurityUtil {
+    @NonFinal
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
 
     @Value("${quangduy.jwt.base64-secret}")
+    @NonFinal
     private String jwtKey;
 
     @Value("${quangduy.jwt.access-token-validity-in-seconds}")
+    @NonFinal
     private long accessTokenExpiration;
 
     @Value("${quangduy.jwt.refresh-token-validity-in-seconds}")
+    @NonFinal
     private long refreshTokenExpiration;
 
-    private final JwtEncoder jwtEncoder;
-
-    public SecurityUtil(JwtEncoder jwtEncoder) {
-        this.jwtEncoder = jwtEncoder;
-    }
+    final JwtEncoder jwtEncoder;
 
     public String createAccessToken(String email, LoginResponse dto) {
         // user info inside token
         LoginResponse.UserInsideToken userToken = new LoginResponse.UserInsideToken();
-        userToken.set_id(dto.getUser().get_id());
+        userToken.setId(dto.getUser().getId());
         userToken.setEmail(dto.getUser().getEmail());
         userToken.setName(dto.getUser().getName());
 
@@ -57,8 +67,7 @@ public class SecurityUtil {
 
         // hardcode permission (for testing)
         List<String> listAuthority = new ArrayList<String>();
-        listAuthority.add("ROLE_USER_CREATE");
-        listAuthority.add("ROLE_USER_UPDATE");
+        listAuthority.add("ROLE_USER");
 
         // @formatter:off
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -75,7 +84,7 @@ public class SecurityUtil {
     public String createRefreshToken(String email, LoginResponse dto) {
         // user info inside token
         LoginResponse.UserInsideToken userToken = new LoginResponse.UserInsideToken();
-        userToken.set_id(dto.getUser().get_id());
+        userToken.setId(dto.getUser().getId());
         userToken.setEmail(dto.getUser().getEmail());
         userToken.setName(dto.getUser().getName());
 
@@ -105,7 +114,7 @@ public class SecurityUtil {
                 try {
                      return jwtDecoder.decode(token);
                 } catch (Exception e) {
-                    System.out.println(">>> Refresh toekn error: " + e.getMessage());
+                    System.out.println(">>> Refresh token error: " + e.getMessage());
                     throw e;
                 }
     }

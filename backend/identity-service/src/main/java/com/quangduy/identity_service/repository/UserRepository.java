@@ -8,4 +8,6 @@ import com.quangduy.identity_service.entity.User;
 
 public interface UserRepository extends JpaRepository<User, String> {
     Page<User> findAll(Pageable pageable);
+
+    User findByUsername(String username);
 }

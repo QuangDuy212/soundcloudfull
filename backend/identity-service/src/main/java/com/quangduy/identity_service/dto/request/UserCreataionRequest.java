@@ -25,6 +25,7 @@ public class UserCreataionRequest {
     @NotBlank(message = "EMAIL_IS_REQUIRED")
     String email;
     String name;
+    String type;
     String age;
     String gender;
     String address;

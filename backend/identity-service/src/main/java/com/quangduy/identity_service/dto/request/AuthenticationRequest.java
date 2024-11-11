@@ -1,4 +1,4 @@
-package com.quangduy.identity_service.dto.response;
+package com.quangduy.identity_service.dto.request;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -12,15 +12,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-    String id;
+public class AuthenticationRequest {
     String username;
-    String email;
-    String address;
-    boolean isVerify;
-    String type;
-    String name;
-    String role;
-    String gender;
-    int age;
+    String password;
 }

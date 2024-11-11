@@ -1,6 +1,9 @@
 package com.quangduy.identity_service.dto.response;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,20 +18,19 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LoginResponse {
+public class AuthenticationResponse {
     @JsonProperty("access_token")
     String accessToken;
     @JsonProperty("refresh_token")
     String refreshToken;
-    UserLogin user;
+    Data user;
+    Date expiryTime;
 
     @Getter
     @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class UserLogin {
+    public static class Data {
         String id;
         String username;
         String email;
@@ -39,25 +41,5 @@ public class LoginResponse {
         String role;
         String gender;
         int age;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class UserGetAccount {
-        UserLogin user;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class UserInsideToken {
-        String id;
-        String email;
-        String name;
     }
 }

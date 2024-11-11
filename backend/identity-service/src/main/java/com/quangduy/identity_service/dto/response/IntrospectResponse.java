@@ -12,15 +12,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-    String id;
-    String username;
-    String email;
-    String address;
-    boolean isVerify;
-    String type;
-    String name;
-    String role;
-    String gender;
-    int age;
+public class IntrospectResponse {
+    boolean valid;
 }

@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserUpdateRequest {
-    String _id;
+    String id;
     @Size(min = 4, message = "USERNAME_INVALID")
     String username;
 
@@ -30,4 +30,5 @@ public class UserUpdateRequest {
     String gender;
     String address;
     String role;
+    String type;
 }

@@ -23,9 +23,9 @@ public class SecurityConfiguration {
                         CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
 
                 String[] whileList = {
-                                "/", "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/register",
-                                "/storage/**", "/api/v1/email/**",
-                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+                                "/", "/auth/login", "/auth/refresh", "/auth/register",
+                                "/storage/**",
+                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/users/**"
                 };
                 http
                                 .csrf(c -> c.disable())
@@ -33,19 +33,10 @@ public class SecurityConfiguration {
                                 .authorizeHttpRequests(
                                                 authz -> authz
                                                                 .requestMatchers(whileList).permitAll()
-                                                                .requestMatchers("/api/v1/users/**")
-                                                                .permitAll()
                                                                 .anyRequest().authenticated())
                                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
-                                                // config for handle exception
                                                 .authenticationEntryPoint(customAuthenticationEntryPoint))
-                                // .exceptionHandling(
-                                // exceptions -> exceptions
-                                // .authenticationEntryPoint(customAuthenticationEntryPoint) // 401
-                                // .accessDeniedHandler(new BearerTokenAccessDeniedHandler())) // 403
-                                // disable login
                                 .formLogin(f -> f.disable())
-                                // config for spring rest stateful -> stateless
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
                 return http.build();

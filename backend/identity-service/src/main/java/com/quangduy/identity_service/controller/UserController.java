@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quangduy.common_service.dto.response.ApiPagination;
@@ -28,18 +26,15 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping(path = "/api/v1/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class UserController {
     UserService userService;
 
-    @PostMapping(
-            // path = "/api/v1/users"
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    @ResponseBody
-    ApiResponse<UserResponse> create(UserCreataionRequest request) {
+    @PostMapping
+    ApiResponse<UserResponse> create(@RequestBody UserCreataionRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .statusCode(200)
                 .message("Create success")
@@ -74,7 +69,7 @@ public class UserController {
                 .build();
     }
 
-    @PutMapping()
+    @PatchMapping()
     ApiResponse<UserResponse> updateUser(@RequestBody UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .statusCode(200)

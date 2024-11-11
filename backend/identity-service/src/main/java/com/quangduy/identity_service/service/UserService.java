@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.quangduy.common_service.dto.response.ApiPagination;
 import com.quangduy.identity_service.constant.PredefinedRole;
-import com.quangduy.identity_service.constant.TypeEnum;
 import com.quangduy.identity_service.dto.request.UserCreataionRequest;
 import com.quangduy.identity_service.dto.request.UserUpdateRequest;
 import com.quangduy.identity_service.dto.response.UserResponse;
@@ -39,7 +38,7 @@ public class UserService {
         log.info("Create a new user");
         User user = this.userMapper.toUser(request);
         user.setPassword(this.passwordEncoder.encode(request.getPassword()));
-        user.setType(TypeEnum.SYSTEM);
+        user.setType("SYSTEM");
         user.setVerify(false);
         if (request.getRole().equals(null)) {
             user.setRole(PredefinedRole.USER_ROLE);
@@ -80,7 +79,7 @@ public class UserService {
     }
 
     public UserResponse updateUser(UserUpdateRequest request) {
-        Optional<User> user = this.userRepository.findById(request.get_id());
+        Optional<User> user = this.userRepository.findById(request.getId());
         if (user.isPresent()) {
             this.userMapper.updateUser(user.get(), request);
             if (!request.getPassword().equals(null))
@@ -88,5 +87,17 @@ public class UserService {
         }
 
         return userMapper.toUserResponse(userRepository.save(user.get()));
+    }
+
+    public User handleGetUserByUsername(String username) {
+        return this.userRepository.findByUsername(username);
+    }
+
+    public void updateUserToken(String token, String username) {
+        User currentUser = this.handleGetUserByUsername(username);
+        if (currentUser != null) {
+            currentUser.setRefreshToken(token);
+            this.userRepository.save(currentUser);
+        }
     }
 }
