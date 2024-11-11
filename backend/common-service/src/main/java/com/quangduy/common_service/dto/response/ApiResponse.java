@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
     int statusCode;
-    String message;
+    Object message;
     String error;
     T data;
 }
