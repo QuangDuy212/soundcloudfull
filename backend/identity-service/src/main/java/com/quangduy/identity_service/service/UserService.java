@@ -19,6 +19,7 @@ import com.quangduy.identity_service.dto.response.UserResponse;
 import com.quangduy.identity_service.entity.User;
 import com.quangduy.identity_service.mapper.UserMapper;
 import com.quangduy.identity_service.repository.UserRepository;
+import com.quangduy.identity_service.util.exception.MyAppException;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +35,18 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
-    public UserResponse create(UserCreataionRequest request) {
+    public UserResponse create(UserCreataionRequest request) throws MyAppException {
         log.info("Create a new user");
+
+        boolean isExistsEmail = this.isEmailExist(request.getEmail());
+        if (isExistsEmail) {
+            throw new MyAppException("Email đã tồn tại, vui lòng nhập lại!");
+        }
+
+        boolean isExistUsername = this.isUsernameExist(request.getUsername());
+        if (isExistUsername) {
+            throw new MyAppException("Username đã tồn tại, vui lòng nhập lại!");
+        }
         User user = this.userMapper.toUser(request);
         user.setPassword(this.passwordEncoder.encode(request.getPassword()));
         user.setType("SYSTEM");
@@ -99,5 +110,22 @@ public class UserService {
             currentUser.setRefreshToken(token);
             this.userRepository.save(currentUser);
         }
+    }
+
+    public boolean isEmailExist(String email) {
+        return this.userRepository.existsByEmail(email);
+    }
+
+    public boolean isUsernameExist(String username) {
+        return this.userRepository.existsByUsername(username);
+    }
+
+    public void handleLogout(User user) {
+        user.setRefreshToken(null);
+        this.userRepository.save(user);
+    }
+
+    public User getUserByRefreshTokenAndUsername(String token, String username) {
+        return this.userRepository.findByRefreshTokenAndUsername(token, username);
     }
 }

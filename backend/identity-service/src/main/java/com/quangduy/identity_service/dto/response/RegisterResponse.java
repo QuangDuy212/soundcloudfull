@@ -1,5 +1,7 @@
 package com.quangduy.identity_service.dto.response;
 
+import java.time.Instant;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AccessLevel;
@@ -14,16 +16,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
+public class RegisterResponse {
     @JsonProperty("_id")
     String id;
-    String username;
-    String email;
-    String address;
-    boolean isVerify;
-    String type;
-    String name;
-    String role;
-    String gender;
-    int age;
+    Instant createdAt;
 }

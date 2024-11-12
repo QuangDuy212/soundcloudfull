@@ -2,6 +2,7 @@ package com.quangduy.identity_service.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,11 +10,21 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+
+import com.quangduy.identity_service.constant.PredefinedRole;
 import com.quangduy.identity_service.dto.request.LoginRequest;
+import com.quangduy.identity_service.dto.request.RegisterRequest;
 import com.quangduy.identity_service.dto.response.LoginResponse;
+import com.quangduy.identity_service.dto.response.RegisterResponse;
+import com.quangduy.identity_service.dto.response.UserResponse;
 import com.quangduy.identity_service.entity.User;
+import com.quangduy.identity_service.mapper.AuthMapper;
+import com.quangduy.identity_service.mapper.UserMapper;
+import com.quangduy.identity_service.repository.UserRepository;
 import com.quangduy.identity_service.util.SecurityUtil;
+import com.quangduy.identity_service.util.exception.MyAppException;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +41,9 @@ public class AuthService {
         SecurityUtil securityUtil;
         UserService userService;
         PasswordEncoder passwordEncoder;
+        AuthMapper authMapper;
+        UserMapper userMapper;
+        UserRepository userRepository;
 
         @Value("${quangduy.jwt.refresh-token-validity-in-seconds}")
         @NonFinal
@@ -70,12 +84,115 @@ public class AuthService {
 
                 // create refesh token
                 String refresh_token = this.securityUtil.createRefreshToken(request.getUsername(), res);
-
+                res.setRefreshToken(refresh_token);
                 this.userService.updateUserToken(refresh_token, request.getUsername());
 
                 // set cookies
                 ResponseCookie resCookies = ResponseCookie
                                 .from("refresh_token", refresh_token)
+                                .httpOnly(true)
+                                .secure(true)
+                                .path("/")
+                                .maxAge(refreshTokenExpiration)
+                                .build();
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, resCookies.toString())
+                                .body(res);
+        }
+
+        public ResponseEntity<RegisterResponse> register(RegisterRequest request) throws MyAppException {
+
+                String hashPass = passwordEncoder.encode(request.getPassword());
+                request.setPassword(hashPass);
+                boolean isExistsEmail = this.userService.isEmailExist(request.getEmail());
+                if (isExistsEmail) {
+                        throw new MyAppException("Email đã tồn tại, vui lòng nhập lại!");
+                }
+
+                boolean isExistUsername = this.userService.isUsernameExist(request.getUsername());
+                if (isExistUsername) {
+                        throw new MyAppException("Username đã tồn tại, vui lòng nhập lại!");
+                }
+                User user = this.authMapper.toUser(request);
+                user.setPassword(this.passwordEncoder.encode(request.getPassword()));
+                user.setType("SYSTEM");
+                user.setVerify(false);
+                if (request.getRole() == null) {
+                        user.setRole(PredefinedRole.USER_ROLE.toString());
+                }
+                user = this.userRepository.save(user);
+                RegisterResponse response = this.authMapper.toRegisterResponse(user);
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+
+        public ResponseEntity<UserResponse> getAccount() {
+                String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get()
+                                : "";
+
+                User currentUserDB = this.userService.handleGetUserByUsername(email);
+                UserResponse res = this.userMapper.toUserResponse(currentUserDB);
+                return ResponseEntity.ok().body(res);
+        }
+
+        public ResponseEntity<Void> logout() throws MyAppException {
+                String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get()
+                                : "";
+                if (email.equals("")) {
+                        throw new MyAppException("Access Token không hợp lệ");
+                }
+                User currentUserDB = this.userService.handleGetUserByUsername(email);
+                if (currentUserDB != null) {
+                        // set refresh token == null
+                        this.userService.handleLogout(currentUserDB);
+                }
+                // remove refresh_token in cookies
+                ResponseCookie deleteSpringCookie = ResponseCookie
+                                .from("refresh_token", null)
+                                .httpOnly(true)
+                                .secure(true)
+                                .path("/")
+                                .maxAge(0)
+                                .build();
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, deleteSpringCookie.toString())
+                                .body(null);
+        }
+
+        public ResponseEntity<LoginResponse> refreshToken(String refresh_token) throws MyAppException {
+                // check valid token
+                if (refresh_token.equals("duy")) {
+                        throw new MyAppException("Bạn không có refresh_token ở cookies");
+                }
+                Jwt decodedToken = this.securityUtil.checkValidRefreshToken(refresh_token);
+                String username = decodedToken.getSubject();
+
+                // check user by token + email ( 2nd layer check)
+                User currentUser = this.userService.getUserByRefreshTokenAndUsername(refresh_token, username);
+                if (currentUser == null) {
+                        throw new MyAppException("Refresh token không hợp lệ");
+                }
+
+                // issue new token/set refresh token as cookies
+                LoginResponse res = new LoginResponse();
+                User currentUserDB = this.userService.handleGetUserByUsername(username);
+                if (currentUserDB != null) {
+                        res = LoginResponse.builder()
+                                        .user(this.authMapper.toUserLogin(currentUserDB))
+                                        .build();
+                }
+
+                // create a token
+                String access_token = this.securityUtil.createAccessToken(username, res);
+                res.setAccessToken(access_token);
+
+                // create refesh token
+                String new_refresh_token = this.securityUtil.createRefreshToken(username, res);
+                res.setRefreshToken(new_refresh_token);
+                this.userService.updateUserToken(new_refresh_token, username);
+
+                // set cookies
+                ResponseCookie resCookies = ResponseCookie
+                                .from("refresh_token", new_refresh_token)
                                 .httpOnly(true)
                                 .secure(true)
                                 .path("/")

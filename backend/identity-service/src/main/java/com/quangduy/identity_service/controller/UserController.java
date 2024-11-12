@@ -19,6 +19,7 @@ import com.quangduy.identity_service.dto.request.UserCreataionRequest;
 import com.quangduy.identity_service.dto.request.UserUpdateRequest;
 import com.quangduy.identity_service.dto.response.UserResponse;
 import com.quangduy.identity_service.service.UserService;
+import com.quangduy.identity_service.util.exception.MyAppException;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    ApiResponse<UserResponse> create(@RequestBody UserCreataionRequest request) {
+    ApiResponse<UserResponse> create(@RequestBody UserCreataionRequest request) throws MyAppException {
         return ApiResponse.<UserResponse>builder()
                 .statusCode(200)
                 .message("Create success")

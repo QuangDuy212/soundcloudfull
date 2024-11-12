@@ -29,6 +29,7 @@ public class LoginResponse {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class UserLogin {
+        @JsonProperty("_id")
         String id;
         String username;
         String email;
