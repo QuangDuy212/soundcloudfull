@@ -1,6 +1,8 @@
 package com.quangduy.identity_service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +17,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonPropertyOrder(alphabetic = true)
 public class LoginResponse {
     @JsonProperty("access_token")
     String accessToken;
@@ -28,6 +31,7 @@ public class LoginResponse {
     @NoArgsConstructor
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
+    @JsonPropertyOrder(alphabetic = true)
     public static class UserLogin {
         @JsonProperty("_id")
         String id;
@@ -47,6 +51,7 @@ public class LoginResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
+    @JsonPropertyOrder(alphabetic = true)
     public static class UserGetAccount {
         UserLogin user;
     }
@@ -56,6 +61,7 @@ public class LoginResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
+    @JsonPropertyOrder(alphabetic = true)
     public static class UserInsideToken {
         String id;
         String email;

@@ -1,7 +1,9 @@
 package com.quangduy.identity_service.mapper;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import com.quangduy.identity_service.dto.request.UserCreataionRequest;
 import com.quangduy.identity_service.dto.request.UserUpdateRequest;
@@ -14,5 +16,6 @@ public interface UserMapper {
 
     User toUser(UserCreataionRequest request);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
 }

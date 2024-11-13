@@ -61,7 +61,7 @@ public class UserService {
 
     public List<UserResponse> getUsers() {
         log.info("Get all users");
-        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
+        return this.userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
     public ApiPagination<UserResponse> getUsers(Pageable pageable) {
@@ -91,10 +91,12 @@ public class UserService {
 
     public UserResponse updateUser(UserUpdateRequest request) {
         Optional<User> user = this.userRepository.findById(request.getId());
+
         if (user.isPresent()) {
+            if (request.getAge() == 0) {
+                request.setAge(user.get().getAge());
+            }
             this.userMapper.updateUser(user.get(), request);
-            if (!request.getPassword().equals(null))
-                user.get().setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
         return userMapper.toUserResponse(userRepository.save(user.get()));

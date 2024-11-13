@@ -3,6 +3,7 @@ package com.quangduy.identity_service.dto.response;
 import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonPropertyOrder(alphabetic = true)
 public class RegisterResponse {
     @JsonProperty("_id")
     String id;
