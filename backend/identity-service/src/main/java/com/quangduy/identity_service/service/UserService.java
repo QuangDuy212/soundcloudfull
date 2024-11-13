@@ -1,17 +1,15 @@
 package com.quangduy.identity_service.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.quangduy.common_service.dto.response.ApiPagination;
+import com.quangduy.common_service.dto.response.ApiResponse;
 import com.quangduy.identity_service.constant.PredefinedRole;
 import com.quangduy.identity_service.dto.request.UserCreataionRequest;
 import com.quangduy.identity_service.dto.request.UserUpdateRequest;
@@ -19,6 +17,8 @@ import com.quangduy.identity_service.dto.response.UserResponse;
 import com.quangduy.identity_service.entity.User;
 import com.quangduy.identity_service.mapper.UserMapper;
 import com.quangduy.identity_service.repository.UserRepository;
+import com.quangduy.identity_service.util.exception.ConstantException;
+import com.quangduy.identity_service.util.exception.ErrorCode;
 import com.quangduy.identity_service.util.exception.MyAppException;
 
 import lombok.AccessLevel;
@@ -84,9 +84,23 @@ public class UserService {
                 .build();
     }
 
-    public String delete(String userId) {
+    public UserResponse fetchUserById(String id) throws ConstantException {
+        User user = new User();
+        try {
+            user = this.userRepository.findById(id)
+                    .orElseThrow(() -> new ConstantException(ErrorCode.USER_NOT_EXISTED));
+        } catch (ConstantException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return this.userMapper.toUserResponse(user);
+    }
+
+    public void delete(String userId) throws ConstantException {
+        boolean check = this.userRepository.existsById(userId);
+        if (!check)
+            throw new ConstantException(ErrorCode.USER_NOT_EXISTED);
         this.userRepository.deleteById(userId);
-        return "ok";
     }
 
     public UserResponse updateUser(UserUpdateRequest request) {

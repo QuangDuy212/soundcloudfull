@@ -52,20 +52,16 @@ public class GlobalExceptionHanlder {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
-    // @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    // public ResponseEntity<ApiResponse<Object>>
-    // handleNotValidException(MethodArgumentNotValidException ex) {
-    // BindingResult result = ex.getBindingResult();
-    // final List<FieldError> fieldErrors = result.getFieldErrors();
-    // ApiResponse<Object> res = new ApiResponse<Object>();
-    // res.setStatusCode(HttpStatus.BAD_REQUEST.value());
-    // res.setError(ex.getBody().getDetail());
+    @ExceptionHandler(value = ConstantException.class)
+    ResponseEntity<ApiResponse> handlingConstantException(ConstantException exception) {
+        ErrorCode errorCode = exception.getErrorCode();
+        ApiResponse apiResponse = new ApiResponse();
 
-    // List<String> errors = fieldErrors.stream().map(f ->
-    // f.getDefaultMessage()).collect(Collectors.toList());
-    // res.setMessage(errors.size() > 1 ? errors : errors.get(0));
-    // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
-    // }
+        apiResponse.setStatusCode(errorCode.getStatusCode().value());
+        apiResponse.setMessage(errorCode.getMessage());
+
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+    }
 
     @ExceptionHandler(value = {
             NoResourceFoundException.class,
