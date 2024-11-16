@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quangduy.common_service.dto.response.ApiResponse;
+import com.quangduy.identity_service.dto.request.IntrospectRequest;
 import com.quangduy.identity_service.dto.request.LoginRequest;
 import com.quangduy.identity_service.dto.request.RegisterRequest;
+import com.quangduy.identity_service.dto.response.IntrospectResponse;
 import com.quangduy.identity_service.dto.response.LoginResponse;
 import com.quangduy.identity_service.dto.response.RegisterResponse;
 import com.quangduy.identity_service.dto.response.UserResponse;
@@ -61,5 +63,11 @@ public class AuthController {
     ResponseEntity<LoginResponse> refreshToken(
             @CookieValue(name = "refresh_token", defaultValue = "duy") String refresh_token) throws MyAppException {
         return this.authService.refreshToken(refresh_token);
+    }
+
+    @PostMapping("/introspect")
+    ResponseEntity<IntrospectResponse> authenticate(@RequestBody IntrospectRequest request) {
+        var result = this.authService.introspect(request);
+        return result;
     }
 }

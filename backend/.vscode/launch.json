@@ -18,6 +18,17 @@
       "mainClass": "com.quangduy.identity_service.IdentityServiceApplication",
       "projectName": "identity-service",
       "args": "",
+      "envFile": "${workspaceFolder}/.env",
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=53494 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=identity-service"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-ApiGatewayApplication<api-gateway>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.quangduy.api_gateway.ApiGatewayApplication",
+      "projectName": "api-gateway",
+      "args": "",
       "envFile": "${workspaceFolder}/.env"
     }
   ]

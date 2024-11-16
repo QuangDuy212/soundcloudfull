@@ -1,5 +1,9 @@
 package com.quangduy.identity_service.service;
 
+import java.text.ParseException;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,9 +17,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.SignedJWT;
 import com.quangduy.identity_service.constant.PredefinedRole;
+import com.quangduy.identity_service.dto.request.IntrospectRequest;
 import com.quangduy.identity_service.dto.request.LoginRequest;
 import com.quangduy.identity_service.dto.request.RegisterRequest;
+import com.quangduy.identity_service.dto.response.IntrospectResponse;
 import com.quangduy.identity_service.dto.response.LoginResponse;
 import com.quangduy.identity_service.dto.response.RegisterResponse;
 import com.quangduy.identity_service.dto.response.UserResponse;
@@ -24,6 +34,8 @@ import com.quangduy.identity_service.mapper.AuthMapper;
 import com.quangduy.identity_service.mapper.UserMapper;
 import com.quangduy.identity_service.repository.UserRepository;
 import com.quangduy.identity_service.util.SecurityUtil;
+import com.quangduy.identity_service.util.exception.ConstantException;
+import com.quangduy.identity_service.util.exception.ErrorCode;
 import com.quangduy.identity_service.util.exception.MyAppException;
 
 import lombok.AccessLevel;
@@ -48,6 +60,23 @@ public class AuthService {
         @Value("${quangduy.jwt.refresh-token-validity-in-seconds}")
         @NonFinal
         long refreshTokenExpiration;
+
+        @Value("${quangduy.jwt.base64-secret}")
+        @NonFinal
+        String SIGNER_KEY;
+
+        public ResponseEntity<IntrospectResponse> introspect(IntrospectRequest request) {
+                var token = request.getToken();
+                boolean isValid = true;
+
+                try {
+                        verifyToken(token, false);
+                } catch (JOSEException | ParseException | ConstantException e) {
+                        isValid = false;
+                }
+
+                return ResponseEntity.ok().body(IntrospectResponse.builder().valid(isValid).build());
+        }
 
         public ResponseEntity<LoginResponse> login(LoginRequest request) {
                 // Nạp input gồm username/password vào Security
@@ -135,12 +164,13 @@ public class AuthService {
         }
 
         public ResponseEntity<Void> logout() throws MyAppException {
-                String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get()
+                String username = SecurityUtil.getCurrentUserLogin().isPresent()
+                                ? SecurityUtil.getCurrentUserLogin().get()
                                 : "";
-                if (email.equals("")) {
+                if (username.equals("")) {
                         throw new MyAppException("Access Token không hợp lệ");
                 }
-                User currentUserDB = this.userService.handleGetUserByUsername(email);
+                User currentUserDB = this.userService.handleGetUserByUsername(username);
                 if (currentUserDB != null) {
                         // set refresh token == null
                         this.userService.handleLogout(currentUserDB);
@@ -201,5 +231,32 @@ public class AuthService {
                 return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, resCookies.toString())
                                 .body(res);
+        }
+
+        private SignedJWT verifyToken(String token, boolean isRefresh)
+                        throws JOSEException, ParseException, ConstantException {
+                JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+                SignedJWT signedJWT = SignedJWT.parse(token);
+
+                Date expiryTime = (isRefresh)
+                                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
+                                                .toInstant().plus(refreshTokenExpiration, ChronoUnit.SECONDS)
+                                                .toEpochMilli())
+                                : signedJWT.getJWTClaimsSet().getExpirationTime();
+
+                var verified = signedJWT.verify(verifier);
+
+                if (!(verified && expiryTime.after(new Date())))
+                        throw new ConstantException(ErrorCode.UNAUTHENTICATED);
+
+                String username = SecurityUtil.getCurrentUserLogin().isPresent()
+                                ? SecurityUtil.getCurrentUserLogin().get()
+                                : "";
+                if (username.equals("")) {
+                        throw new ConstantException(ErrorCode.UNAUTHENTICATED);
+                }
+
+                return signedJWT;
         }
 }
