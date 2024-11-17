@@ -1,0 +1,10 @@
+server:
+  port: 8002
+  servlet:
+    context-path: /tracks
+spring:
+  application:
+    name: track-service
+  data:
+    mongodb:
+      uri: mongodb://root:root@localhost:27017/track-service?authSource=admin
