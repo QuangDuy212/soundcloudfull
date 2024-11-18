@@ -1,4 +1,4 @@
-package com.quangduy.identity_service.util;
+package com.quangduy.track_service.util;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.Resource;
@@ -15,7 +15,7 @@ import com.quangduy.common_service.dto.response.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
 @ControllerAdvice
-public class FormatApiResponse implements ResponseBodyAdvice<Object> {
+public class FormatRestResponse implements ResponseBodyAdvice<Object> {
     @Override
     public boolean supports(MethodParameter returnType, Class converterType) {
         return true;

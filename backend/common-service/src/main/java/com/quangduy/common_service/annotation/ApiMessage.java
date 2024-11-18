@@ -1,4 +1,4 @@
-package com.quangduy.identity_service.util.annotation;
+package com.quangduy.common_service.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

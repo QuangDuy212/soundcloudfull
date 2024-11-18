@@ -8,16 +8,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.quangduy.common_service.dto.response.ApiResponse;
+import com.quangduy.common_service.annotation.ApiMessage;
+import com.quangduy.common_service.dto.response.UserResponse;
 import com.quangduy.identity_service.dto.request.IntrospectRequest;
 import com.quangduy.identity_service.dto.request.LoginRequest;
 import com.quangduy.identity_service.dto.request.RegisterRequest;
 import com.quangduy.identity_service.dto.response.IntrospectResponse;
 import com.quangduy.identity_service.dto.response.LoginResponse;
 import com.quangduy.identity_service.dto.response.RegisterResponse;
-import com.quangduy.identity_service.dto.response.UserResponse;
 import com.quangduy.identity_service.service.AuthService;
-import com.quangduy.identity_service.util.annotation.ApiMessage;
 import com.quangduy.identity_service.util.exception.MyAppException;
 
 import jakarta.validation.Valid;

@@ -8,3 +8,10 @@ spring:
   data:
     mongodb:
       uri: mongodb://root:root@localhost:27017/track-service?authSource=admin
+quangduy:
+  jwt:
+    base64-secret: qoAEABDke07+AVLepXB4aCMtsT0wMAqR5x2VFyldsnx6e75YQkJH2UcZKTjEyoNgG71SBCXfq5N6NVZxWOfsHQ==
+app:
+  services:
+    identity:
+      url: http://localhost:8001/identity

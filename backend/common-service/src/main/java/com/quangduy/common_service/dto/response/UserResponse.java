@@ -1,4 +1,4 @@
-package com.quangduy.identity_service.dto.response;
+package com.quangduy.common_service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

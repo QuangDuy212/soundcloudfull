@@ -1,12 +1,7 @@
-package com.quangduy.identity_service.config;
+package com.quangduy.track_service.configuration;
 
-import java.lang.reflect.Method;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,7 +24,7 @@ public class SecurityConfiguration {
                         CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
 
                 String[] whileList = {
-                                "/", "/auth/login", "/auth/refresh", "/auth/register"
+                                "/auth/account"
                 };
                 http
                                 .csrf(c -> c.disable())
@@ -37,8 +32,6 @@ public class SecurityConfiguration {
                                 .authorizeHttpRequests(
                                                 authz -> authz
                                                                 .requestMatchers(whileList).permitAll()
-                                                                .requestMatchers(HttpMethod.GET, "/users/name/**")
-                                                                .permitAll()
                                                                 .anyRequest().authenticated())
                                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                                                 .authenticationEntryPoint(customAuthenticationEntryPoint))
@@ -47,5 +40,4 @@ public class SecurityConfiguration {
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
                 return http.build();
         }
-
 }

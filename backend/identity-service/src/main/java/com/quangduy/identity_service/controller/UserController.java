@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.quangduy.common_service.annotation.ApiMessage;
 import com.quangduy.common_service.dto.response.ApiPagination;
 import com.quangduy.common_service.dto.response.ApiResponse;
+import com.quangduy.common_service.dto.response.UserResponse;
 import com.quangduy.identity_service.dto.request.UserCreataionRequest;
 import com.quangduy.identity_service.dto.request.UserUpdateRequest;
-import com.quangduy.identity_service.dto.response.UserResponse;
 import com.quangduy.identity_service.service.UserService;
-import com.quangduy.identity_service.util.annotation.ApiMessage;
 import com.quangduy.identity_service.util.exception.ConstantException;
 import com.quangduy.identity_service.util.exception.MyAppException;
 
@@ -59,6 +59,12 @@ public class UserController {
     @ApiMessage("Get detail a user success")
     ResponseEntity<UserResponse> getDetailUser(@PathVariable("userId") String userId) throws ConstantException {
         return ResponseEntity.ok().body(this.userService.fetchUserById(userId));
+    }
+
+    @GetMapping("/name/{username}")
+    @ApiMessage("Get detail a user success")
+    ResponseEntity<UserResponse> getUserByUsername(@PathVariable("username") String username) throws MyAppException {
+        return ResponseEntity.ok().body(this.userService.fetchUserByUsername(username));
     }
 
     @DeleteMapping("/{userId}")
