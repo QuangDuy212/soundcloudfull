@@ -1,22 +1,24 @@
 package com.quangduy.track_service.service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.core.Constants.ConstantException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import com.quangduy.common_service.dto.response.ApiPagination;
 import com.quangduy.common_service.dto.response.UserResponse;
 import com.quangduy.track_service.dto.request.TrackCreationRequest;
+import com.quangduy.track_service.dto.request.TrackUpdateRequest;
 import com.quangduy.track_service.dto.response.TrackResponse;
 import com.quangduy.track_service.entity.Track;
 import com.quangduy.track_service.mapper.TrackMapper;
 import com.quangduy.track_service.repository.TrackRepository;
 import com.quangduy.track_service.repository.httpClient.IdentityClient;
 import com.quangduy.track_service.util.SecurityUtil;
+import com.quangduy.track_service.util.exception.MyAppException;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,8 @@ public class TrackService {
                 .type(user.getType())
                 .build();
         track.setUploader(uploader);
+        track.setCreatedAt(Instant.now());
+        track.setUpdatedAt(Instant.now());
         this.trackRepository.save(track);
         return this.trackMapper.toTrackResponse(track);
     }
@@ -66,5 +70,35 @@ public class TrackService {
                 .meta(mt)
                 .result(listTrack)
                 .build();
+    }
+
+    public TrackResponse update(String trackId, TrackUpdateRequest request) {
+        Optional<Track> track = this.trackRepository.findById(trackId);
+
+        if (track.isPresent()) {
+            this.trackMapper.updateTrack(track.get(), request);
+            track.get().setUpdatedAt(Instant.now());
+        }
+
+        return this.trackMapper.toTrackResponse(this.trackRepository.save(track.get()));
+    }
+
+    public void delete(String trackId) throws MyAppException {
+        boolean check = this.trackRepository.existsById(trackId);
+        if (!check)
+            throw new MyAppException("Track not existed");
+        this.trackRepository.deleteById(trackId);
+    }
+
+    public TrackResponse fetchUserById(String id) throws MyAppException {
+        Track track = null;
+        try {
+            track = this.trackRepository.findById(id)
+                    .orElseThrow(() -> new MyAppException("Track don't exist"));
+        } catch (ConstantException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return this.trackMapper.toTrackResponse(track);
     }
 }
