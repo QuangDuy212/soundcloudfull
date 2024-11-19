@@ -39,6 +39,8 @@ public class SecurityConfiguration {
                                                                 .requestMatchers(whileList).permitAll()
                                                                 .requestMatchers(HttpMethod.GET, "/users/name/**")
                                                                 .permitAll()
+                                                                .requestMatchers(HttpMethod.GET, "/users/**")
+                                                                .permitAll()
                                                                 .anyRequest().authenticated())
                                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                                                 .authenticationEntryPoint(customAuthenticationEntryPoint))

@@ -5,12 +5,16 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.core.Constants.ConstantException;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import com.quangduy.common_service.dto.response.ApiPagination;
 import com.quangduy.common_service.dto.response.UserResponse;
+import com.quangduy.track_service.dto.request.GetTrackCreatedByUser;
+import com.quangduy.track_service.dto.request.GetTrackTopRequest;
 import com.quangduy.track_service.dto.request.TrackCreationRequest;
+import com.quangduy.track_service.dto.request.TrackSearchRequest;
 import com.quangduy.track_service.dto.request.TrackUpdateRequest;
 import com.quangduy.track_service.dto.response.TrackResponse;
 import com.quangduy.track_service.entity.Track;
@@ -95,10 +99,67 @@ public class TrackService {
         try {
             track = this.trackRepository.findById(id)
                     .orElseThrow(() -> new MyAppException("Track don't exist"));
-        } catch (ConstantException e) {
+        } catch (MyAppException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return this.trackMapper.toTrackResponse(track);
+    }
+
+    public List<TrackResponse> fetchTrackByCategory(GetTrackTopRequest request) {
+        Pageable pageable = PageRequest.of(0, request.getLimit(), Sort.by("countPlay"));
+
+        return this.trackRepository.findByCategory(request.getCategory(), pageable)
+                .stream().map(trackMapper::toTrackResponse).toList();
+    }
+
+    public ApiPagination<TrackResponse> searchTracks(TrackSearchRequest request) {
+        log.info("Search track with name");
+        Pageable pageable = PageRequest.of(request.getCurrent(), request.getPageSize());
+        Page<Track> pageTrack = this.trackRepository.findByTitleContains(request.getTitle(), pageable);
+
+        List<TrackResponse> listTrack = pageTrack.getContent().stream().map(this.trackMapper::toTrackResponse).toList();
+
+        ApiPagination.Meta mt = new ApiPagination.Meta();
+
+        mt.setCurrent(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+
+        mt.setPages(pageTrack.getTotalPages());
+        mt.setTotal(pageTrack.getTotalElements());
+
+        return ApiPagination.<TrackResponse>builder()
+                .meta(mt)
+                .result(listTrack)
+                .build();
+    }
+
+    public ApiPagination<TrackResponse> getTrackCreatedByUser(GetTrackCreatedByUser request, Pageable pageable) {
+        log.info("Get track created by user");
+        UserResponse user = null;
+        try {
+            user = this.identityClient.getDetailUser(request.getId()).getData();
+        } catch (Exception e) {
+            // TODO: handle exception
+            log.info("Has an error in identity client get detail user: " + e);
+        }
+
+        Track.Uploader uploader = this.trackMapper.toUploader(user);
+        Page<Track> pageTrack = this.trackRepository.findByUploader(uploader, pageable);
+
+        List<TrackResponse> listTrack = pageTrack.getContent().stream().map(this.trackMapper::toTrackResponse).toList();
+
+        ApiPagination.Meta mt = new ApiPagination.Meta();
+
+        mt.setCurrent(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+
+        mt.setPages(pageTrack.getTotalPages());
+        mt.setTotal(pageTrack.getTotalElements());
+
+        return ApiPagination.<TrackResponse>builder()
+                .meta(mt)
+                .result(listTrack)
+                .build();
     }
 }

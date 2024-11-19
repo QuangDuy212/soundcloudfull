@@ -11,4 +11,7 @@ import com.quangduy.common_service.dto.response.UserResponse;
 public interface IdentityClient {
     @GetMapping(value = "/users/name/{username}")
     ApiResponse<UserResponse> getUserByUsername(@PathVariable String username);
+
+    @GetMapping(value = "/users/{userId}")
+    ApiResponse<UserResponse> getDetailUser(@PathVariable String userId);
 }

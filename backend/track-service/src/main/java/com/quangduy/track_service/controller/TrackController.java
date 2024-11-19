@@ -1,5 +1,7 @@
 package com.quangduy.track_service.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.quangduy.common_service.annotation.ApiMessage;
 import com.quangduy.common_service.dto.response.ApiPagination;
+import com.quangduy.track_service.dto.request.GetTrackCreatedByUser;
+import com.quangduy.track_service.dto.request.GetTrackTopRequest;
 import com.quangduy.track_service.dto.request.TrackCreationRequest;
+import com.quangduy.track_service.dto.request.TrackSearchRequest;
 import com.quangduy.track_service.dto.request.TrackUpdateRequest;
 import com.quangduy.track_service.dto.response.TrackResponse;
 import com.quangduy.track_service.service.TrackService;
@@ -66,5 +71,24 @@ public class TrackController {
             @PathVariable("trackId") String trackId) throws MyAppException {
         this.trackService.delete(trackId);
         return ResponseEntity.ok(null);
+    }
+
+    @PostMapping("/top")
+    @ApiMessage("Get track top by category")
+    ResponseEntity<List<TrackResponse>> getTrackTopByCategory(@RequestBody GetTrackTopRequest request) {
+        return ResponseEntity.ok().body(this.trackService.fetchTrackByCategory(request));
+    }
+
+    @PostMapping("/search")
+    @ApiMessage("Search track with name")
+    ResponseEntity<ApiPagination<TrackResponse>> searchTrackWithName(@RequestBody TrackSearchRequest request) {
+        return ResponseEntity.ok().body(this.trackService.searchTracks(request));
+    }
+
+    @PostMapping("/users")
+    @ApiMessage("Get tracks created by user")
+    ResponseEntity<ApiPagination<TrackResponse>> getTrackBy(@RequestBody GetTrackCreatedByUser request,
+            Pageable pageable) {
+        return ResponseEntity.ok().body(this.trackService.getTrackCreatedByUser(request, pageable));
     }
 }

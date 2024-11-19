@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import com.quangduy.common_service.dto.response.UserResponse;
 import com.quangduy.track_service.dto.request.TrackCreationRequest;
 import com.quangduy.track_service.dto.request.TrackUpdateRequest;
 import com.quangduy.track_service.dto.response.TrackResponse;
@@ -18,4 +19,6 @@ public interface TrackMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateTrack(@MappingTarget Track track, TrackUpdateRequest request);
+
+    Track.Uploader toUploader(UserResponse request);
 }
